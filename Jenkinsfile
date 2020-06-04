@@ -1,12 +1,10 @@
 pipeline {
     agent { node('master')}
-    triggers {
-        pollSCM('* * * * *')
-    }
     stages {
         stage('Preparation') {
             steps {
-                echo 'prepare ok'
+                checkout scm
+                echo 'prepare ok!'
             }
         }
         stage('Test') {
