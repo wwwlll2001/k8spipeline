@@ -4,7 +4,7 @@ pipeline {
         stage('Preparation') {
             steps {
                 checkout scm
-                echo 'prepare ok'
+                echo 'prepare ok1'
             }
         }
         stage('Test') {
