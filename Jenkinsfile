@@ -29,17 +29,17 @@ pipeline {
         }
     }
 
-    post {
-//         always {
-//             archive 'build/libs/**/*.jar'
-//             junit keepLongStdio: true, testResults: '**/test-results/**/*.xml'
-//             jacoco exclusionPattern: '**/test/**'
-//         }
-//         success {
-//             slackSend channel: "#fundswatcher", color: "#00FF00", message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})"
-//         }
-//         failure {
-//             slackSend channel: "#fundswatcher", color: "#FF0000", message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})"
-//         }
-    }
+//     post {
+// //         always {
+// //             archive 'build/libs/**/*.jar'
+// //             junit keepLongStdio: true, testResults: '**/test-results/**/*.xml'
+// //             jacoco exclusionPattern: '**/test/**'
+// //         }
+// //         success {
+// //             slackSend channel: "#fundswatcher", color: "#00FF00", message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})"
+// //         }
+// //         failure {
+// //             slackSend channel: "#fundswatcher", color: "#FF0000", message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})"
+// //         }
+//     }
 }
