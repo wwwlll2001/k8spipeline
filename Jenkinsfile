@@ -4,7 +4,7 @@ podTemplate(
     label: label, runAsUser: "0", cloud: 'kubernetes-dev',
     containers: [
       containerTemplate(name: 'gradle', image: 'gradle:6.3.0', command: 'cat', ttyEnabled: true),
-//       containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true),
+      containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true),
 //      containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.8', command: 'cat', ttyEnabled: true),
 //      containerTemplate(name: 'helm', image: 'lachlanevenson/k8s-helm:latest', command: 'cat', ttyEnabled: true)
     ],
@@ -37,11 +37,11 @@ podTemplate(
         throw(exc)
       }
     }
-//     stage('Build') {
-//       container('gradle') {
-//         sh "gradle build"
-//       }
-//     }
+    stage('Build') {
+      container('gradle') {
+        sh "gradle build"
+      }
+    }
 //     stage('Create Docker images') {
 //       container('docker') {
 //         withCredentials([[$class: 'UsernamePasswordMultiBinding',
