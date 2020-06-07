@@ -1,64 +1,67 @@
-#定义参数label，K8S启动的pod名称通过这个来制定
-def label = "JenkinsPOD-${UUID.randomUUID().toString()}"
-#定义jenkins的工作目录
-def jenworkspace="/home/jenkins/workspace/${params.PROJECT}"
-#maven项目缓存，提供编译速度
-def mvnrepo="/tmp/repository"
-#kubectl和docker执行文件，这个可以打到镜像里面，这边直接共享的方式提供
-def sharefile="/tmp/sharefile"
-#deployment等K8S的yaml文件目录
-def k8srepo='/tmp/k8s_repos'
+def label = "worker-${UUID.randomUUID().toString()}"
 
-#cloud为我们前面提供的云名称，nodeSelector是K8S运行pod的节点选择
-podTemplate(label: label, cloud: 'kubernetes-hiningmeng',nodeSelector: 'devops.k8s.icjl/jenkins=jnlp',
-    containers: [
-        containerTemplate(
-            name: 'jnlp',
-            image: 'registry-vpc.cn-hangzhou.aliyuncs.com/hiningmeng/jnlp:v1',
-            ttyEnabled: true,
-            alwaysPullImage: false),
-        containerTemplate(
-            name: 'jnlp-maven',
-            image: 'jenkins/jnlp-agent-maven',
-            //image:'ungerts/jnlp-agent-maven',
-            ttyEnabled: true,
-            alwaysPullImage: false,
-            command: 'cat')
-    ],
-    volumes: [
-        hostPathVolume(hostPath: '/var/run/docker.sock', mountPath:'/var/run/docker.sock'),
-        persistentVolumeClaim(mountPath: "$mvnrepo", claimName: 'maven-repo-pvc', readOnly: false),
-        persistentVolumeClaim(mountPath: "$sharefile", claimName: 'sharefile-repo-pvc', readOnly: false),
-    ]
-)
+podTemplate(label: label, runAsUser: 0, fsGroup: 0, containers: [
+  containerTemplate(name: 'gradle', image: 'gradle:4.5.1-jdk9', command: 'cat', ttyEnabled: true),
+  containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true),
+  containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.8', command: 'cat', ttyEnabled: true),
+  containerTemplate(name: 'helm', image: 'lachlanevenson/k8s-helm:latest', command: 'cat', ttyEnabled: true)
+],
+volumes: [
+  hostPathVolume(mountPath: '/home/gradle/.gradle', hostPath: '/tmp/jenkins/.gradle'),
+  hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')
+])
 pipeline {
+  node(label) {
+    def myRepo = checkout scm
+    def gitCommit = myRepo.GIT_COMMIT
+    def gitBranch = myRepo.GIT_BRANCH
+    def shortGitCommit = "${gitCommit[0..10]}"
+    def previousGitCommit = sh(script: "git rev-parse ${gitCommit}~", returnStdout: true)
 
-    node (label) {
-        stage('Hello World'){
-            container('jnlp'){
-                echo "hello, world"
-                sh "ln -s $sharefile/kubectl  /usr/bin/kubectl"
-                sh "ln -s $sharefile/docker /usr/bin/docker"
-
-            }
+    stage('Test') {
+      try {
+        container('gradle') {
+          sh """
+            pwd
+            echo "GIT_BRANCH=${gitBranch}" >> /etc/environment
+            echo "GIT_COMMIT=${gitCommit}" >> /etc/environment
+            gradle test
+            """
         }
-        stage('Git Pull'){
-            dir("$jenworkspace"){
-                git branch: "${params.BRANCH}", changelog: false, credentialsId: 'jenkins-pull-key', poll: false, url: "${params.CODE_URL}"
-            }
-        }
-        stage('Mvn Package'){
-            container('jnlp-maven'){
-                dir("$jenworkspace"){
-                    sh "mvn clean install -Dmaven.test.skip=true  -U  -s  $sharefile/settings.xml"
-                }
-            }
-        }
-        stage('Docker build'){
-            ...
-        }
-        stage('K8S Deploy'){
-            ...
-        }
+      }
+      catch (exc) {
+        println "Failed to test - ${currentBuild.fullDisplayName}"
+        throw(exc)
+      }
     }
+//     stage('Build') {
+//       container('gradle') {
+//         sh "gradle build"
+//       }
+//     }
+//     stage('Create Docker images') {
+//       container('docker') {
+//         withCredentials([[$class: 'UsernamePasswordMultiBinding',
+//           credentialsId: 'dockerhub',
+//           usernameVariable: 'DOCKER_HUB_USER',
+//           passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
+//           sh """
+//             docker login -u ${DOCKER_HUB_USER} -p ${DOCKER_HUB_PASSWORD}
+//             docker build -t namespace/my-image:${gitCommit} .
+//             docker push namespace/my-image:${gitCommit}
+//             """
+//         }
+//       }
+//     }
+//     stage('Run kubectl') {
+//       container('kubectl') {
+//         sh "kubectl get pods"
+//       }
+//     }
+//     stage('Run helm') {
+//       container('helm') {
+//         sh "helm list"
+//       }
+//     }
+  }
 }
