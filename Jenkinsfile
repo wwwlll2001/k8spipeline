@@ -36,7 +36,7 @@ pipeline {
     node (label) {
         stage('Hello World'){
             container('jnlp'){
-                echo "hello, world?1"
+                echo "hello, world?"
                 sh "ln -s $sharefile/kubectl  /usr/bin/kubectl"
                 sh "ln -s $sharefile/docker /usr/bin/docker"
 
