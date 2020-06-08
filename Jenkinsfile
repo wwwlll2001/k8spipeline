@@ -42,20 +42,17 @@ podTemplate(
         sh "gradle build"
       }
     }
-//     stage('Create Docker images') {
-//       container('docker') {
-//         withCredentials([[$class: 'UsernamePasswordMultiBinding',
-//           credentialsId: 'dockerhub',
-//           usernameVariable: 'DOCKER_HUB_USER',
-//           passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
-//           sh """
-//             docker login -u ${DOCKER_HUB_USER} -p ${DOCKER_HUB_PASSWORD}
-//             docker build -t namespace/my-image:${gitCommit} .
-//             docker push namespace/my-image:${gitCommit}
-//             """
-//         }
-//       }
-//     }
+    stage('publish') {
+      container('docker') {
+        docker.withRegistry('https://752535683739.dkr.ecr.cn-northwest-1.amazonaws.com.cn/dev-repository',
+                            'ecr:cn-northwest-1:95189c1e-6db8-4c81-8e93-3e303e665433') {
+                    //build image
+                    def customImage = docker.build("k8spipeline:${env.BUILD_ID}")
+                    //push image
+                    customImage.push()
+                }
+      }
+    }
 //     stage('Run kubectl') {
 //       container('kubectl') {
 //         sh "kubectl get pods"
