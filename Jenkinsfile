@@ -55,8 +55,6 @@ podTemplate(
     }
     stage('deploy') {
       container('kubectl') {
-        sh "kubectl apply -f kubernetes/service-account.yaml"
-        sh "kubectl delete -f kubernetes/deployment.yaml"
         sh "kubectl apply -f kubernetes"
       }
     }
