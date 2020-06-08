@@ -46,8 +46,10 @@ podTemplate(
       container('docker') {
         docker.withRegistry('https://752535683739.dkr.ecr.cn-northwest-1.amazonaws.com.cn/dev-repository',
                             'ecr:cn-northwest-1:95189c1e-6db8-4c81-8e93-3e303e665433') {
-          docker.build("k8spipeline:${env.BUILD_ID}_${gitCommit}").push().push("latest")
-
+//           docker.build("k8spipeline:${env.BUILD_ID}_${gitCommit}").push().push("latest")
+          def newApp = docker.build("k8spipeline:${env.BUILD_ID}_${gitCommit}")
+          newApp.push() // record this snapshot (optional)
+          newApp.push 'latest'
         }
       }
     }
