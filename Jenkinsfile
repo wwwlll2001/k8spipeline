@@ -44,22 +44,12 @@ podTemplate(
     }
     stage('publish') {
       container('docker') {
-//         steps {
-//             docker.withRegistry('https://752535683739.dkr.ecr.cn-northwest-1.amazonaws.com.cn/dev-repository',
-//                                     'ecr:cn-northwest-1:95189c1e-6db8-4c81-8e93-3e303e665433') {
-//               docker.build("k8spipeline:${env.BUILD_ID}").push()
-//               println "push successfully"
-//             }
-//         }
-        steps {
-            script {
                 docker.withRegistry('https://752535683739.dkr.ecr.cn-northwest-1.amazonaws.com.cn/dev-repository',
                                     'ecr:cn-northwest-1:95189c1e-6db8-4c81-8e93-3e303e665433') {
-                  docker.build("fundswatcher-api/fundswatcher-api:${BUILD_NUMBER}").push()
+//                   docker.build("fundswatcher-api/fundswatcher-api:${BUILD_NUMBER}").push()
+                println "publish successfully"
                 }
             }
-        }
-      }
     }
   }
 }
