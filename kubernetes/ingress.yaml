@@ -6,7 +6,7 @@ metadata:
     kubernetes.io/ingress.class: "nginx"
 #    nginx.ingress.kubernetes.io/ssl-redirect: "false"
 #    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
-#    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   #  tls:
   #    - hosts:
@@ -16,7 +16,7 @@ spec:
     - host: a214b41a0e0514e2699db63fe5357379-bb5f5c88a96cfab5.elb.cn-northwest-1.amazonaws.com.cn
       http:
         paths:
-          - path: /k8spipeline
+          - path: /
             backend:
               serviceName: k8spipeline
               servicePort: 8080
