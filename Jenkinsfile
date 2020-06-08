@@ -55,7 +55,7 @@ podTemplate(
     }
     stage('deploy') {
       container('kubectl') {
-        sh "kubectl delete -f k8spipeline"
+        sh "kubectl delete deployment k8spipeline"
         sh "kubectl apply -f kubernetes"
       }
     }
