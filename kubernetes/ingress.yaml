@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
-  name: jenkins
+  name: k8spipeline
 spec:
   rules:
     - host: a214b41a0e0514e2699db63fe5357379-bb5f5c88a96cfab5.elb.cn-northwest-1.amazonaws.com.cn
