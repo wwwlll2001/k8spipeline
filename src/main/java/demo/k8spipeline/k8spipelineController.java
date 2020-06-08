@@ -11,7 +11,7 @@ public class k8spipelineController {
 
     @GetMapping("/how")
     public String howAreU() {
-        return "nnnnnn, fine, thank you, and you?";
+        return "fine, thank you, and you?";
     }
 
     @GetMapping("/hello")
