@@ -5,7 +5,7 @@ podTemplate(
     containers: [
       containerTemplate(name: 'gradle', image: 'gradle:6.3.0', command: 'cat', ttyEnabled: true),
       containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true),
-      containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.8', command: 'cat', ttyEnabled: true),
+      containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.16.10', command: 'cat', ttyEnabled: true),
 //      containerTemplate(name: 'helm', image: 'lachlanevenson/k8s-helm:latest', command: 'cat', ttyEnabled: true)
     ],
     volumes: [

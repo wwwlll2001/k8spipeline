@@ -6,8 +6,8 @@ metadata:
     app: k8spipeline
 spec:
   ports:
-  - name: k8spipeline
-    port: 8080
-    targetPort: 8080
+    - name: k8spipeline
+      port: 8080
+      targetPort: 8080
   selector:
     app: k8spipeline
