@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8spipeline
+  labels:
+    app: k8spipeline
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: k8spipeline
+  template:
+    metadata:
+      labels:
+        app: k8spipeline
+    spec:
+      containers:
+        - name: k8spipeline
+          image: 752535683739.dkr.ecr.cn-northwest-1.amazonaws.com.cn/k8spipeline:44_5ff26826b730a2e21840c115dc75ecb3c575ca80
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+

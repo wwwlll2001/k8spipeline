@@ -5,7 +5,7 @@ podTemplate(
     containers: [
       containerTemplate(name: 'gradle', image: 'gradle:6.3.0', command: 'cat', ttyEnabled: true),
       containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true),
-//      containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.8', command: 'cat', ttyEnabled: true),
+      containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.8', command: 'cat', ttyEnabled: true),
 //      containerTemplate(name: 'helm', image: 'lachlanevenson/k8s-helm:latest', command: 'cat', ttyEnabled: true)
     ],
     volumes: [
@@ -48,6 +48,11 @@ podTemplate(
                             'ecr:cn-northwest-1:95189c1e-6db8-4c81-8e93-3e303e665433') {
           docker.build("k8spipeline:${env.BUILD_ID}_${gitCommit}").push()
         }
+      }
+    }
+    stage('deploy') {
+      container('kubectl') {
+        kubectl apply -f kubernetes
       }
     }
   }
