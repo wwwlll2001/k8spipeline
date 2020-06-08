@@ -14,7 +14,7 @@ spec:
       labels:
         app: k8spipeline
     spec:
-      serviceAccountName: jenkins-admin
+      serviceAccountName: k8spipeline
       containers:
         - name: k8spipeline
           image: 752535683739.dkr.ecr.cn-northwest-1.amazonaws.com.cn/k8spipeline:44_5ff26826b730a2e21840c115dc75ecb3c575ca80
