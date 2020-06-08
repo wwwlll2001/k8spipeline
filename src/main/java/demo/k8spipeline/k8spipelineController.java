@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/k8spipeline")
 public class k8spipelineController {
 
-    @GetMapping("/how-are-you")
+    @GetMapping("/how")
     public String howAreU() {
         return "nnnnnn, fine, thank you, and you?";
     }

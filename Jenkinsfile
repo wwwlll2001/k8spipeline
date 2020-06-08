@@ -56,6 +56,7 @@ podTemplate(
     stage('deploy') {
       container('kubectl') {
         sh "kubectl get pod"
+        sh "kubectl delete -f kubernetes"
         sh "kubectl apply -f kubernetes"
       }
     }
