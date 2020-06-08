@@ -18,4 +18,9 @@ public class k8spipelineController {
     public String hello() {
         return "hello";
     }
+
+    @GetMapping("/")
+    public String hi() {
+        return "hi";
+    }
 }

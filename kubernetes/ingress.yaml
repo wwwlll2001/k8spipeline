@@ -4,11 +4,11 @@ metadata:
   name: k8spipeline
   annotations:
     kubernetes.io/ingress.class: "nginx"
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+#    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+#    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
 #    nginx.ingress.kubernetes.io/add-base-url: "true"
-#    nginx.ingress.kubernetes.io/rewrite-target: "/"
-#    nginx.org/rewrites: "serviceName=k8spipeline rewrite=/apple/banana"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+#    nginx.org/rewrites: "serviceName=k8spipeline rewrite=/apple/;serviceName=apple1 rewrite=/bbc/"
 #    nginx.ingress.kubernetes.io/enable-rewrite-log: "true"
   namespace: devops
 spec:
@@ -20,12 +20,13 @@ spec:
     - host: a214b41a0e0514e2699db63fe5357379-bb5f5c88a96cfab5.elb.cn-northwest-1.amazonaws.com.cn
       http:
         paths:
-          - path: /apple
+          - path: /apple(/|$)(.*)
             backend:
               serviceName: k8spipeline
               servicePort: 8080
-#          - path: /apple/
-#            backend:
-#              serviceName: k8spipeline
-#              servicePort: 8080
+          - path: /banana(/|$)(.*)
+            backend:
+              serviceName: k8spipeline
+              servicePort: 8080
+
 
