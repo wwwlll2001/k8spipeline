@@ -52,6 +52,7 @@ podTemplate(
     }
     stage('deploy') {
       container('kubectl') {
+        sh "kubectl get pod"
         sh "kubectl apply -f kubernetes"
       }
     }
