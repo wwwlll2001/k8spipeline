@@ -58,7 +58,7 @@ podTemplate(
     }
     stage('deploy') {
       container('helm') {
-        sh "helm install ${project} ./${project} --set image.tag=${imageTag} -f ${project}/values-${env}.yaml --namespace ${namespace}"
+        sh "helm upgrade --install ${project} ./${project} --set image.tag=${imageTag} -f ${project}/values-${env}.yaml --namespace ${namespace}"
       }
     }
   }

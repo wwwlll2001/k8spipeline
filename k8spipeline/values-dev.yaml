@@ -25,3 +25,13 @@ ingress:
 
 configmap: |-
   greeting: "i am good"
+  management:
+    endpoint:
+      health:
+        show-details: ALWAYS
+      restart:
+        enabled: true
+    endpoints:
+      web:
+        exposure:
+          include: '*'
