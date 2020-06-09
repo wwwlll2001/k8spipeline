@@ -20,6 +20,9 @@ podTemplate(
     def gitBranch = myRepo.GIT_BRANCH
     def shortGitCommit = "${gitCommit[0..10]}"
     def previousGitCommit = sh(script: "git rev-parse ${gitCommit}~", returnStdout: true)
+    def project = "k8spipeline"
+    def imageTag = "${env.BUILD_ID}_${gitCommit}"
+    def namespace = "devops"
 
     stage('Test') {
       try {
@@ -46,17 +49,15 @@ podTemplate(
       container('docker') {
         docker.withRegistry('https://752535683739.dkr.ecr.cn-northwest-1.amazonaws.com.cn/dev-repository',
                             'ecr:cn-northwest-1:95189c1e-6db8-4c81-8e93-3e303e665433') {
-//           docker.build("k8spipeline:${env.BUILD_ID}_${gitCommit}").push().push("latest")
-          def newApp = docker.build("k8spipeline:${env.BUILD_ID}_${gitCommit}")
+          def newApp = docker.build("k8spipeline:${imageTag}")
           newApp.push() // record this snapshot (optional)
           newApp.push 'latest'
         }
       }
     }
     stage('deploy') {
-      container('kubectl') {
-        sh "kubectl delete deployment k8spipeline"
-        sh "kubectl apply -f kubernetes"
+      container('helm') {
+        sh "helm install ${project} ./{project} --set image.tag=${imageTag} --namespace ${namespace}"
       }
     }
   }
