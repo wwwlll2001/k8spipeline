@@ -1,6 +1,6 @@
 spring:
   application:
-    name: k8spipeline123
+    name: k8spipeline
   cloud:
     kubernetes:
       reload:
