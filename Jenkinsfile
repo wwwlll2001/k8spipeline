@@ -1,64 +1,117 @@
-def label = "worker-${UUID.randomUUID().toString()}"
-
-podTemplate(
-    label: label, runAsUser: "0", cloud: 'kubernetes-dev',
-    containers: [
-      containerTemplate(name: 'gradle', image: 'gradle:6.3.0', command: 'cat', ttyEnabled: true),
-      containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true),
-      containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.16.10', command: 'cat', ttyEnabled: true),
-      containerTemplate(name: 'helm', image: 'lachlanevenson/k8s-helm:v3.1.2', command: 'cat', ttyEnabled: true)
-    ],
-    volumes: [
-      hostPathVolume(mountPath: '/home/gradle/.gradle', hostPath: '/tmp/jenkins/.gradle'),
-      hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')
-    ]
-)
-{
-  node(label) {
-    def myRepo = checkout scm
-    def gitCommit = myRepo.GIT_COMMIT
-    def gitBranch = myRepo.GIT_BRANCH
-    def shortGitCommit = "${gitCommit[0..10]}"
-    def previousGitCommit = sh(script: "git rev-parse ${gitCommit}~", returnStdout: true)
-    def project = "k8spipeline"
-    def imageTag = "${env.BUILD_ID}_${gitCommit}"
-    def namespace = "devops"
-    def env = "dev"
-
+pipeline {
+  parameters {
+    string(name: 'project', defaultValue: 'k8spipeline', description: 'project name')
+    string(name: 'namespace', defaultValue: 'devops', description: 'namespace')
+    string(name: 'env', defaultValue: 'dev', description: 'env')
+  }
+  environment {
+    MY_REPO=checkout scm
+    GIT_COMMIT=MY_REPO.GIT_COMMIT
+    GIT_BRANCH=MY_REPO.GIT_BRANCH
+    IMAGE_TAG = ${env.BUILD_ID}_${GIT_COMMIT}
+  }
+  agent {
+    kubernetes-dev {
+      yaml """
+apiVersion: v1
+kind: Pod
+metadata:
+ label: worker-${random.uuid}
+spec:
+ securityContext:
+   runAsUser: 0
+ containers:
+ - name: gradle
+   image: gradle:6.3.0
+   command:
+   - cat
+   tty: true
+   mountPath:
+   - name: volumegradle
+     path: /tmp/jenkins/.gradle
+ - name: docker
+   image: docker
+   command:
+   - cat
+   tty: true
+   mountPath:
+   - name: volumedocker
+     path: /var/run/docker.sock
+ - name: kubectl
+   image: lachlanevenson/k8s-kubectl:v1.16.10
+   command:
+   - cat
+   tty: true
+ - name: helm
+   image: lachlanevenson/k8s-helm:v3.1.2
+   command:
+   - cat
+   tty: true
+ volumes:
+ - name: volumegradle
+   hostPath:
+     path: /tmp/jenkins/.gradle
+ - name: volumedocker
+   hostPath:
+     path: /var/run/docker.sock
+"""
+    }
+  }
+  stages {
     stage('Test') {
-      try {
+      steps {
         container('gradle') {
-          sh """
-            pwd
-            echo "GIT_BRANCH=${gitBranch}" >> /etc/environment
-            echo "GIT_COMMIT=${gitCommit}" >> /etc/environment
-            gradle test
-            """
+          script {
+            echo 'project: ${params.project}'
+            echo 'namespace: ${params.namespace}'
+            echo 'env: ${params.env}'
+            echo 'MY_REPO: ${MY_REPO}'
+            echo 'GIT_COMMIT: ${GIT_COMMIT}'
+            echo 'GIT_BRANCH: ${GIT_BRANCH}'
+            echo 'IMAGE_TAG: ${IMAGE_TAG}'
+            try {
+              sh """
+                pwd
+                echo "GIT_BRANCH=${GIT_BRANCH}" >> /etc/environment
+                echo "GIT_COMMIT=${GIT_COMMIT}" >> /etc/environment
+                gradle test
+                """
+            } catch (Exception e) {
+              echo 'Failed to test - ${currentBuild.fullDisplayName}'
+              echo err.getMessage()
+            }
+          }
         }
-      }
-      catch (exc) {
-        println "Failed to test - ${currentBuild.fullDisplayName}"
-        throw(exc)
       }
     }
     stage('Build') {
-      container('gradle') {
-        sh "gradle build"
+      steps {
+        container('gradle') {
+          sh "gradle build"
+        }
       }
     }
     stage('publish') {
-      container('docker') {
-        docker.withRegistry('https://752535683739.dkr.ecr.cn-northwest-1.amazonaws.com.cn/dev-repository',
-                            'ecr:cn-northwest-1:95189c1e-6db8-4c81-8e93-3e303e665433') {
-          def newApp = docker.build("k8spipeline:${imageTag}")
-          newApp.push() // record this snapshot (optional)
-          newApp.push 'latest'
+      steps {
+        container('docker') {
+          script {
+            docker.withRegistry('https://752535683739.dkr.ecr.cn-northwest-1.amazonaws.com.cn/dev-repository',
+            'ecr:cn-northwest-1:95189c1e-6db8-4c81-8e93-3e303e665433') {
+              def newApp = docker.build("k8spipeline:${IMAGE_TAG}")
+              newApp.push() // record this snapshot (optional)
+              newApp.push 'latest'
+            }
+          }
         }
       }
     }
     stage('deploy') {
-      container('helm') {
-        sh "helm upgrade --install ${project} ./${project} --set image.tag=${imageTag} -f ${project}/values-${env}.yaml --namespace ${namespace}"
+      steps {
+        container('helm') {
+          script {
+            sh "helm upgrade --install ${params.project} ./${params.project} --set image.tag=${IMAGE_TAG} -f ${params.project}/values-${params.env}.yaml --namespace ${params.namespace}"
+          }
+        }
       }
     }
   }
