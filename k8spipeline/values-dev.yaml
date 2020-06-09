@@ -24,7 +24,7 @@ ingress:
           servicePort: 8080
 
 configmap: |-
-  greeting: "i am good"
+  greeting: "i am NOT good"
   management:
     endpoint:
       health:
