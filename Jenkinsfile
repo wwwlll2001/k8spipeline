@@ -23,6 +23,7 @@ podTemplate(
     def project = "k8spipeline"
     def imageTag = "${env.BUILD_ID}_${gitCommit}"
     def namespace = "devops"
+    def env = "dev"
 
     stage('Test') {
       try {
@@ -57,7 +58,7 @@ podTemplate(
     }
     stage('deploy') {
       container('helm') {
-        sh "helm install ${project} ./${project} --set image.tag=${imageTag} --namespace ${namespace}"
+        sh "helm install ${project} ./${project} --set image.tag=${imageTag} -f ${project}/values-${env}.yaml --namespace ${namespace}"
       }
     }
   }
