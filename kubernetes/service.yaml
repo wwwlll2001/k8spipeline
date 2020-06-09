@@ -11,17 +11,3 @@ spec:
       targetPort: 8080
   selector:
     app: k8spipeline
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: apple1
-  labels:
-    app: k8spipeline
-spec:
-  ports:
-    - name: k8spipeline
-      port: 8080
-      targetPort: 8080
-  selector:
-    app: k8spipeline

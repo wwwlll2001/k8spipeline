@@ -1,0 +1,27 @@
+# Default values for k8spipeline.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+environment: dev
+
+replicaCount: 1
+
+image:
+  tag: latest-dev
+
+ingress:
+  enabled: true
+  annotations:
+     kubernetes.io/ingress.class: nginx
+     nginx.ingress.kubernetes.io/rewrite-target: /$2
+  rules:
+    - host: a214b41a0e0514e2699db63fe5357379-bb5f5c88a96cfab5.elb.cn-northwest-1.amazonaws.com.cn
+      http:
+        paths:
+          - path: /k8spipeline(/|$)(.*)
+            backend:
+              serviceName: k8spipeline
+              servicePort: 8080
+
+configmap: |-
+  greeting: "i am good"
