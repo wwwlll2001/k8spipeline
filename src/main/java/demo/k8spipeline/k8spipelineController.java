@@ -25,6 +25,6 @@ public class k8spipelineController {
 
     @GetMapping("/")
     public String hi() {
-        return "hi";
+        return greeting;
     }
 }
