@@ -3,6 +3,9 @@ spring:
     name: k8spipeline
   cloud:
     kubernetes:
+      config:
+        sources:
+          - name: k8spipeline
       reload:
         enabled: true
         monitoring-secrets: true
