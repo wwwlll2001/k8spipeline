@@ -1,7 +1,12 @@
+@Library('jenkins-share-library') _
+
 def gitCommit = null
 def gitBranch = null
 def imageTag = null
 def podLabel = "worker-${UUID.randomUUID().toString()}"
+def project = 'k8spipeline'
+def namespace = 'devops'
+def env = 'dev'
 
 pipeline {
   agent {
@@ -11,18 +16,13 @@ pipeline {
       yamlFile 'kubernetes/kubernetesPod.yaml'
     }
   }
-  environment {
-    PROJECT='k8spipeline'
-    NAMESPACE='devops'
-    ENV='dev'
-  }
   stages {
     stage('Prepare') {
       steps{
         script{
-          def myRepo=checkout scm
-          gitCommit = myRepo.GIT_COMMIT
-          namespace = myRepo.GIT_BRANCH
+          def scm=checkout scm
+          gitCommit = getGitCommit()
+          gitBranch = getGitBranch(scm)
           imageTag = "${env.BUILD_ID}_${gitCommit}"
         }
       }
@@ -71,7 +71,7 @@ pipeline {
       steps {
         container('helm') {
           script {
-            sh "helm upgrade --install ${env.PROJECT} ./${env.PROJECT} --set image.tag=${imageTag} -f ${env.PROJECT}/values-${env.ENV}.yaml --namespace ${env.NAMESPACE}"
+            sh "helm upgrade --install ${PROJECT} ./${PROJECT} --set image.tag=${imageTag} -f ${PROJECT}/values-${ENV}.yaml --namespace ${NAMESPACE}"
           }
         }
       }
