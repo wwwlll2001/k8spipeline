@@ -1,0 +1,90 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: label-kubernetes
+spec:
+  securityContext:
+    runAsUser: 0
+  containers:
+    - name: gradle
+      image: gradle:6.3.0
+      imagePullPolicy: "IfNotPresent"
+      command:
+        - cat
+      securityContext:
+        privileged: false
+      tty: true
+      volumeMounts:
+        - name: volume-0
+          mountPath: /home/gradle/.gradle
+          readOnly: false
+        - mountPath: "/var/run/docker.sock"
+          name: "volume-1"
+          readOnly: false
+        - mountPath: "/home/jenkins/agent"
+          name: "workspace-volume"
+          readOnly: false
+    - name: docker
+      image: docker
+      imagePullPolicy: "IfNotPresent"
+      command:
+        - cat
+      securityContext:
+        privileged: false
+      tty: true
+      volumeMounts:
+        - mountPath: "/home/gradle/.gradle"
+          name: "volume-0"
+          readOnly: false
+        - mountPath: "/var/run/docker.sock"
+          name: "volume-1"
+          readOnly: false
+        - mountPath: "/home/jenkins/agent"
+          name: "workspace-volume"
+          readOnly: false
+    - name: kubectl
+      image: lachlanevenson/k8s-kubectl:v1.16.10
+      imagePullPolicy: "IfNotPresent"
+      command:
+        - cat
+      securityContext:
+        privileged: false
+      tty: true
+      volumeMounts:
+        - mountPath: "/home/gradle/.gradle"
+          name: "volume-0"
+          readOnly: false
+        - mountPath: "/var/run/docker.sock"
+          name: "volume-1"
+          readOnly: false
+        - mountPath: "/home/jenkins/agent"
+          name: "workspace-volume"
+          readOnly: false
+    - name: helm
+      image: lachlanevenson/k8s-helm:v3.1.2
+      imagePullPolicy: "IfNotPresent"
+      command:
+        - cat
+      securityContext:
+        privileged: false
+      tty: true
+      volumeMounts:
+        - mountPath: "/home/gradle/.gradle"
+          name: "volume-0"
+          readOnly: false
+        - mountPath: "/var/run/docker.sock"
+          name: "volume-1"
+          readOnly: false
+        - mountPath: "/home/jenkins/agent"
+          name: "workspace-volume"
+          readOnly: false
+  volumes:
+    - hostPath:
+        path: "/tmp/jenkins/.gradle"
+      name: "volume-0"
+    - hostPath:
+        path: "/var/run/docker.sock"
+      name: "volume-1"
+    - emptyDir:
+        medium: ""
+      name: "workspace-volume"
