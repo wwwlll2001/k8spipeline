@@ -108,10 +108,14 @@ agent {
   }
   stages {
   stage('Prepare') {
-    def myRepo=checkout scm
-    gitCommit = myRepo.GIT_COMMIT
-    namespace = myRepo.GIT_BRANCH
-    imageTag = "${env.BUILD_ID}_${gitCommit}"
+    steps{
+      script{
+        def myRepo=checkout scm
+        gitCommit = myRepo.GIT_COMMIT
+        namespace = myRepo.GIT_BRANCH
+        imageTag = "${env.BUILD_ID}_${gitCommit}"
+      }
+    }
   }
   stage('Test') {
     steps {
