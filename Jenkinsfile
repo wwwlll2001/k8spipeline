@@ -5,7 +5,8 @@ def podLabel = "worker-${UUID.randomUUID().toString()}"
 
 pipeline {
   agent {
-    kubernetes("kubernetes-dev") {
+    kubernetes {
+      cloud kubernetes-dev
       label podLabel
       yaml """
         apiVersion: v1
