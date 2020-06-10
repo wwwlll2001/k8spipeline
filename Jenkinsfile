@@ -20,9 +20,9 @@ pipeline {
     stage('Prepare') {
       steps{
         script{
-          def scm=checkout scm
+          checkout scm
           gitCommit = getGitCommit()
-          gitBranch = getGitBranch(scm)
+          gitBranch = getGitBranch()
           imageTag = "${env.BUILD_ID}_${gitCommit}"
         }
       }
