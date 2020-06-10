@@ -7,6 +7,7 @@ def podLabel = "worker-${UUID.randomUUID().toString()}"
 def project = 'k8spipeline'
 def namespace = 'devops'
 def env = 'dev'
+def buildId = "${env.BUILD_ID}"
 
 pipeline {
   agent {
@@ -23,7 +24,7 @@ pipeline {
           checkout scm
           gitCommit = getGitCommit()
           gitBranch = getGitBranch()
-          imageTag = "${env.BUILD_ID}_${gitCommit}"
+          imageTag = "${buildId}_${gitCommit}"
         }
       }
     }
