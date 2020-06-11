@@ -6,8 +6,7 @@ def imageTag = null
 def podLabel = "worker-${UUID.randomUUID().toString()}"
 def project = 'k8spipeline'
 def namespace = 'devops'
-def env = 'dev'
-def buildId = "${env.BUILD_ID}"
+def currentEnv = 'dev'
 
 pipeline {
   agent {
@@ -24,7 +23,7 @@ pipeline {
           checkout scm
           gitCommit = getGitCommit()
           gitBranch = getGitBranch()
-          imageTag = "${buildId}_${gitCommit}"
+          imageTag = "${env.BUILD_ID}_${gitCommit}"
         }
       }
     }
@@ -72,7 +71,7 @@ pipeline {
       steps {
         container('helm') {
           script {
-            sh "helm upgrade --install ${PROJECT} ./${PROJECT} --set image.tag=${imageTag} -f ${PROJECT}/values-${ENV}.yaml --namespace ${NAMESPACE}"
+            sh "helm upgrade --install ${project} ./${project} --set image.tag=${imageTag} -f ${project}/values-${currentEnv}.yaml --namespace ${namespace}"
           }
         }
       }
