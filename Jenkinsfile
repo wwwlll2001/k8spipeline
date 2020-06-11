@@ -16,63 +16,38 @@ pipeline {
       yamlFile 'kubernetes/kubernetesPod.yaml'
     }
   }
+  options {
+    skipDefaultCheckout()
+  }
   stages {
-    stage('Prepare') {
-      steps{
-        script{
-          checkout scm
-          gitCommit = getGitCommit()
-          gitBranch = getGitBranch()
-          imageTag = "${env.BUILD_ID}_${gitCommit}"
-        }
-      }
-    }
-    stage('Test') {
+
+    stage('Build & Deploy') {
+
+      agent { label 'gradle' }
+
       steps {
-        container('gradle') {
-          script {
-            try {
-              sh """
-                pwd
-                echo "GIT_BRANCH=${gitBranch}" >> /etc/environment
-                echo "GIT_COMMIT=${gitCommit}" >> /etc/environment
-                gradle test
-                """
-            } catch (Exception e) {
-              echo 'Failed to test - ${currentBuild.fullDisplayName}'
-              echo err.getMessage()
-            }
+        script {
+
+          stage('Checkout Code') {
+            checkout scm
+            gitCommit = getGitCommit()
+            gitBranch = getGitBranch()
+            imageTag = "${env.BUILD_ID}_${gitCommit}"
           }
-        }
-      }
-    }
-    stage('Build') {
-      steps {
-        container('gradle') {
-          sh "gradle build"
-        }
-      }
-    }
-    stage('publish') {
-      steps {
-        container('docker') {
-          script {
-            docker.withRegistry('https://752535683739.dkr.ecr.cn-northwest-1.amazonaws.com.cn/dev-repository',
-            'ecr:cn-northwest-1:95189c1e-6db8-4c81-8e93-3e303e665433') {
-              def newApp = docker.build("k8spipeline:${imageTag}")
-              newApp.push() // record this snapshot (optional)
-              newApp.push 'latest'
-            }
-          }
-        }
-      }
-    }
-    stage('deploy') {
-      steps {
-        container('helm') {
-          script {
-            sh "helm upgrade --install ${project} ./${project} --set image.tag=${imageTag} -f ${project}/values-${currentEnv}.yaml --namespace ${namespace}"
-          }
+
+          codeTest(
+            gitCommit: gitCommit,
+            gitBranch: gitBranch
+          )
+
+          buildArtifacts()
+
+          serviceDeploy(
+            project: project,
+            imageTag: imageTag,
+            currentEnv: currentEnv,
+            namespace: namespace
+          )
         }
       }
     }
