@@ -20,34 +20,63 @@ pipeline {
     skipDefaultCheckout()
   }
   stages {
-
-    stage('Build & Deploy') {
-
-      agent { label 'gradle' }
-
+    stage('Checkout Code') {
       steps {
         script {
+          def scm = checkout scm
+          gitCommit = getGitCommit()
+          gitBranch = getGitBranch(scm)
+          imageTag = "${env.BUILD_ID}_${gitCommit}"
+        }
+      }
+    }
 
-          stage('Checkout Code') {
-            checkout scm
-            gitCommit = getGitCommit()
-            gitBranch = getGitBranch()
-            imageTag = "${env.BUILD_ID}_${gitCommit}"
+    stage('Test') {
+      steps {
+        container('gradle'){
+          script {
+            codeTest(
+              gitCommit: gitCommit,
+              gitBranch: gitBranch
+            )
           }
+        }
+      }
+    }
 
-          codeTest(
-            gitCommit: gitCommit,
-            gitBranch: gitBranch
-          )
+    stage('Build') {
+      steps {
+        container('gradle'){
+          script {
+            buildArtifacts()
+          }
+        }
+      }
+    }
 
-          buildArtifacts()
+    stage('publish') {
+      steps {
+        container('docker') {
+          script {
+            publishArtifacts(
+              imageTag: imageTag
+            )
+          }
+        }
+      }
+    }
 
-          serviceDeploy(
-            project: project,
-            imageTag: imageTag,
-            currentEnv: currentEnv,
-            namespace: namespace
-          )
+    stage('deploy') {
+      steps {
+        container('helm') {
+          script {
+            serviceDeploy(
+              project: project,
+              imageTag: imageTag,
+              currentEnv: currentEnv,
+              namespace: namespace
+            )
+          }
         }
       }
     }
