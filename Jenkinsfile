@@ -13,7 +13,7 @@ pipeline {
     kubernetes {
       cloud 'kubernetes-dev'
       label "${podLabel}"
-      yamlFile 'kubernetes/kubernetesPod.yaml'
+      yamlFile libraryResource('com/jenkins/library/build-pod.yaml')
     }
   }
   options {
@@ -32,11 +32,11 @@ pipeline {
         }
         container('gradle'){
           script {
-            codeTest(
+            javaCodeTest(
               gitCommit: gitCommit,
               gitBranch: gitBranch
             )
-            buildArtifacts()
+            javaBuildArtifacts()
           }
         }
         container('docker') {
