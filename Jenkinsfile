@@ -13,7 +13,7 @@ pipeline {
     kubernetes {
       cloud 'kubernetes-dev'
       label "${podLabel}"
-      yamlFile libraryResource('com/jenkins/library/build-pod.yaml')
+      yamlFile libraryResource('com/jenkins/library/kubernetesPod.yaml')
     }
   }
   options {
