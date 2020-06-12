@@ -26,7 +26,8 @@ pipeline {
           stage('Checkout Code') {
             checkout scm
             gitCommit = getGitCommit()
-            namespace = getProjectName()
+            gitBranch = getGitBranch()
+            imageTag = "${env.BUILD_ID}_${gitCommit}"
           }
         }
         container('gradle'){
