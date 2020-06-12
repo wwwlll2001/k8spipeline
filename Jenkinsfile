@@ -20,7 +20,7 @@ pipeline {
     skipDefaultCheckout()
   }
   stages {
-    stage('Checkout Code') {
+    stage('Build & Deploy') {
       steps {
         script {
           stage('Checkout Code') {
