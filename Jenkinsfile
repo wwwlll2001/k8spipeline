@@ -1,4 +1,4 @@
-@Library('jenkins-share-library') _
+@Library('jenkins-share-library@v1.0.0') _
 
 def gitCommit = null
 def gitBranch = null
