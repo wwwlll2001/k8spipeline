@@ -23,39 +23,21 @@ pipeline {
     stage('Checkout Code') {
       steps {
         script {
-          checkout scm
-          gitCommit = getGitCommit()
-          gitBranch = getGitBranch()
-          imageTag = "${env.BUILD_ID}_${gitCommit}"
+          stage('Checkout Code') {
+            checkout scm
+            gitCommit = getGitCommit()
+            namespace = getProjectName()
+          }
         }
-      }
-    }
-
-    stage('Test') {
-      steps {
         container('gradle'){
           script {
             codeTest(
               gitCommit: gitCommit,
               gitBranch: gitBranch
             )
-          }
-        }
-      }
-    }
-
-    stage('Build') {
-      steps {
-        container('gradle'){
-          script {
             buildArtifacts()
           }
         }
-      }
-    }
-
-    stage('publish') {
-      steps {
         container('docker') {
           script {
             publishArtifacts(
@@ -63,11 +45,6 @@ pipeline {
             )
           }
         }
-      }
-    }
-
-    stage('deploy') {
-      steps {
         container('helm') {
           script {
             serviceDeploy(
