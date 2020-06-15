@@ -26,7 +26,7 @@ pipeline {
           stage('Checkout Code') {
             checkout scm
             gitCommit = getGitCommit()
-            gitBranch = getGitBranch()
+            gitBranch = getGitBranch(scm)
             imageTag = "${env.BUILD_ID}_${gitCommit}"
           }
           javaCodeTest(
