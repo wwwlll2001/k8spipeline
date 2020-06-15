@@ -29,32 +29,20 @@ pipeline {
             gitBranch = getGitBranch()
             imageTag = "${env.BUILD_ID}_${gitCommit}"
           }
-        }
-        container('gradle'){
-          script {
-            javaCodeTest(
-              gitCommit: gitCommit,
-              gitBranch: gitBranch
-            )
-            javaBuildArtifacts()
-          }
-        }
-        container('docker') {
-          script {
-            publishArtifacts(
-              imageTag: imageTag
-            )
-          }
-        }
-        container('helm') {
-          script {
-            serviceDeploy(
-              project: project,
-              imageTag: imageTag,
-              currentEnv: currentEnv,
-              namespace: namespace
-            )
-          }
+          javaCodeTest(
+            gitCommit: gitCommit,
+            gitBranch: gitBranch
+          )
+          javaBuildArtifacts()
+          publishArtifacts(
+            imageTag: imageTag
+          )
+          serviceDeploy(
+            project: project,
+            imageTag: imageTag,
+            currentEnv: currentEnv,
+            namespace: namespace
+          )
         }
       }
     }
